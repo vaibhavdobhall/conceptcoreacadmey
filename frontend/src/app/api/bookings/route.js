@@ -1,13 +1,12 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
-);
-
 // GET - Fetch all bookings (for educator dashboard)
 export async function GET(request) {
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL,
+    process.env.SUPABASE_SERVICE_ROLE_KEY
+  );
   try {
     const { data: bookings, error } = await supabase
       .from('bookings')
@@ -41,6 +40,11 @@ export async function GET(request) {
 
 // POST - Create new booking
 export async function POST(request) {
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL,
+    process.env.SUPABASE_SERVICE_ROLE_KEY
+  );
+  
   try {
     const body = await request.json();
     const { studentName, studentEmail, studentPhone, subject, notes, slotId } = body;
