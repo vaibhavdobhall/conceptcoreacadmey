@@ -6,6 +6,7 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- Table: availability_slots
 -- Stores time slots that students can book
+-- Create this table FIRST without the foreign key to bookings
 CREATE TABLE IF NOT EXISTS availability_slots (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   slot_date DATE NOT NULL,
@@ -17,17 +18,12 @@ CREATE TABLE IF NOT EXISTS availability_slots (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL,
   
   -- Ensure end_time is after start_time
-  CONSTRAINT valid_time_range CHECK (end_time > start_time),
-  
-  -- Foreign key to bookings (optional, set when booked)
-  CONSTRAINT fk_booking 
-    FOREIGN KEY (booking_id) 
-    REFERENCES bookings(id) 
-    ON DELETE SET NULL
+  CONSTRAINT valid_time_range CHECK (end_time > start_time)
 );
 
 -- Table: bookings
 -- Stores student booking information
+-- Create this table SECOND with foreign key to availability_slots
 CREATE TABLE IF NOT EXISTS bookings (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   student_name VARCHAR(100) NOT NULL,
@@ -46,6 +42,14 @@ CREATE TABLE IF NOT EXISTS bookings (
     REFERENCES availability_slots(id) 
     ON DELETE RESTRICT
 );
+
+-- Now add the foreign key from availability_slots to bookings
+-- This avoids circular dependency during table creation
+ALTER TABLE availability_slots
+  ADD CONSTRAINT fk_booking 
+    FOREIGN KEY (booking_id) 
+    REFERENCES bookings(id) 
+    ON DELETE SET NULL;
 
 -- Create indexes for better query performance
 CREATE INDEX IF NOT EXISTS idx_availability_slots_date ON availability_slots(slot_date);
