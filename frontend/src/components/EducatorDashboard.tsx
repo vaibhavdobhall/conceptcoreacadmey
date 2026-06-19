@@ -26,9 +26,15 @@ export default function EducatorDashboard() {
       setLoading(true);
       const allBookings = await getAllBookings();
       setBookings(allBookings);
-    } catch (err) {
-      setError('Failed to load bookings. Please try again later.');
-      console.error(err);
+    } catch (err: any) {
+      console.error('Error fetching bookings:', err);
+      if (err.message.includes('Failed to fetch') || err.message.includes('NetworkError')) {
+        setError('Unable to connect to server. Please check your internet connection and try again.');
+      } else if (err.message.includes('404')) {
+        setError('Booking service is not configured. Please check backend configuration.');
+      } else {
+        setError(err.message || 'Failed to load bookings. Please try again later.');
+      }
     } finally {
       setLoading(false);
     }

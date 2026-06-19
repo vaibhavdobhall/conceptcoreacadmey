@@ -170,7 +170,7 @@ We'll deploy the backend as a Vercel Serverless Function.
    - Choose a time slot
    - Fill in your details
    - Submit booking
-3. **Check educator dashboard** to see the booking
+3. **Access educator dashboard** at: `https://your-frontend.vercel.app/admin/dashboard`
 
 ## 🚀 Option 2: Deploy Backend Separately (Alternative)
 
@@ -479,17 +479,19 @@ After deployment:
 - [ ] Can select a date and time
 - [ ] Booking form submits successfully
 - [ ] Confirmation screen appears
-- [ ] Booking shows in educator dashboard
+- [ ] Booking shows in educator dashboard at `/admin/dashboard`
 - [ ] No CORS errors in browser console
 - [ ] Backend API routes work (check Vercel logs)
 
 ## 🐛 Common Issues
 
-### Issue: "Slots not loading"
+### Issue: "Failed to load available time slots"
 **Solution:** 
-- Check that Supabase schema was executed
-- Verify environment variables in Vercel
-- Check Vercel function logs for errors
+- **Check if backend is running:** If using Option 1 or 2, verify backend URL is correct
+- **Check environment variables:** Make sure `NEXT_PUBLIC_API_URL` is set in Vercel
+- **Check Supabase schema:** Verify you ran the SQL in Supabase SQL Editor
+- **Check Vercel logs:** Look for errors in backend function logs
+- **If using Option 3 (API routes):** Make sure API route files are in correct location
 
 ### Issue: "Booking fails"
 **Solution:**
@@ -499,8 +501,56 @@ After deployment:
 
 ### Issue: "CORS error"
 **Solution:**
-- If using separate backend, update `ALLOWED_ORIGINS`
+- If using separate backend, update `ALLOWED_ORIGINS` to include your frontend URL
 - If using API routes (Option 3), no CORS needed!
+
+### Issue: "Educator dashboard visible to everyone"
+**Solution:**
+- The dashboard is now at `/admin/dashboard` (not on main page)
+- For production, add authentication (see below)
+
+## 🔐 Making Educator Dashboard Private (Optional)
+
+Currently, anyone can access `/admin/dashboard`. To make it private:
+
+### Option A: Simple Password Protection
+Add a simple password check in `frontend/src/app/admin/dashboard/page.tsx`:
+```typescript
+'use client';
+import { useState } from 'react';
+
+export default function AdminDashboardPage() {
+  const [authenticated, setAuthenticated] = useState(false);
+  const [password, setPassword] = useState('');
+  
+  if (!authenticated) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <input 
+          type="password" 
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          placeholder="Enter admin password"
+        />
+        <button onClick={() => password === 'your-password' && setAuthenticated(true)}>
+          Login
+        </button>
+      </div>
+    );
+  }
+  
+  return <EducatorDashboard />;
+}
+```
+
+### Option B: Use Vercel Password Protection
+1. In Vercel dashboard, go to your project
+2. Go to Settings → Deployment Protection
+3. Enable "Password Protection"
+4. Set a password - only people with the password can access the site
+
+### Option C: Add Authentication (Production)
+Use Supabase Auth or NextAuth.js for proper authentication.
 
 ## 🎯 Recommended Approach
 
@@ -517,6 +567,7 @@ After deployment:
 - Check Vercel logs: Project → Deployments → View Function Logs
 - Check Supabase logs: Dashboard → Logs
 - Review browser console for frontend errors
+- Make sure you ran the Supabase schema SQL
 
 ---
 

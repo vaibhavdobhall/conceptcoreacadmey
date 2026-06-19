@@ -38,9 +38,15 @@ export default function Booking() {
       setLoading(true);
       const availableSlots = await getAvailableSlots();
       setSlots(availableSlots);
-    } catch (err) {
-      setError('Failed to load available time slots. Please try again later.');
-      console.error(err);
+    } catch (err: any) {
+      console.error('Error fetching slots:', err);
+      if (err.message.includes('Failed to fetch') || err.message.includes('NetworkError')) {
+        setError('Unable to connect to server. Please check your internet connection and try again.');
+      } else if (err.message.includes('404')) {
+        setError('Booking service is temporarily unavailable. Please try again later.');
+      } else {
+        setError('Failed to load available time slots. Please try again later.');
+      }
     } finally {
       setLoading(false);
     }

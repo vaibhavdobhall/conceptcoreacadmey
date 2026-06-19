@@ -43,12 +43,29 @@ export async function getAvailableSlots(startDate?: string, endDate?: string): P
   if (startDate) params.append('startDate', startDate);
   if (endDate) params.append('endDate', endDate);
 
-  const response = await fetch(`${API_URL}/api/availability/slots?${params}`);
-  if (!response.ok) {
-    throw new Error('Failed to fetch available slots');
+  const url = `${API_URL}/api/availability/slots?${params}`;
+  
+  try {
+    const response = await fetch(url);
+    
+    if (!response.ok) {
+      if (response.status === 404) {
+        throw new Error('Booking service is not configured. Please contact support.');
+      } else if (response.status >= 500) {
+        throw new Error('Server error. Please try again later.');
+      } else {
+        throw new Error('Failed to fetch available slots');
+      }
+    }
+    
+    const data = await response.json();
+    return data.slots;
+  } catch (err: any) {
+    if (err.message === 'Failed to fetch' || err.message.includes('NetworkError')) {
+      throw new Error('Unable to connect to booking service. Please check your internet connection.');
+    }
+    throw err;
   }
-  const data = await response.json();
-  return data.slots;
 }
 
 // Fetch available dates
@@ -92,12 +109,29 @@ export async function createBooking(bookingData: CreateBookingData): Promise<Boo
 
 // Get all bookings (for educator dashboard)
 export async function getAllBookings(): Promise<Booking[]> {
-  const response = await fetch(`${API_URL}/api/bookings`);
-  if (!response.ok) {
-    throw new Error('Failed to fetch bookings');
+  const url = `${API_URL}/api/bookings`;
+  
+  try {
+    const response = await fetch(url);
+    
+    if (!response.ok) {
+      if (response.status === 404) {
+        throw new Error('Booking service endpoint not found. Please check backend configuration.');
+      } else if (response.status >= 500) {
+        throw new Error('Server error. Please try again later.');
+      } else {
+        throw new Error('Failed to fetch bookings');
+      }
+    }
+    
+    const data = await response.json();
+    return data.bookings;
+  } catch (err: any) {
+    if (err.message === 'Failed to fetch' || err.message.includes('NetworkError')) {
+      throw new Error('Unable to connect to booking service. Please check your internet connection.');
+    }
+    throw err;
   }
-  const data = await response.json();
-  return data.bookings;
 }
 
 // Get a specific booking
