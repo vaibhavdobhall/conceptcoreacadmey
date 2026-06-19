@@ -54,7 +54,7 @@ router.post('/', validateBooking, async (req, res) => {
       console.error('Booking creation error:', bookingError);
       return res.status(500).json({
         error: 'Failed to create booking',
-        message: 'An error occurred while creating your booking. Please try again.'
+        message: bookingError.message || 'An error occurred while creating your booking. Please try again.'
       });
     }
 
@@ -130,7 +130,7 @@ router.get('/', async (req, res) => {
       console.error('Fetch bookings error:', error);
       return res.status(500).json({
         error: 'Failed to fetch bookings',
-        message: 'An error occurred while fetching bookings.'
+        message: error.message || 'An error occurred while fetching bookings.'
       });
     }
 

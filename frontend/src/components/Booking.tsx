@@ -81,14 +81,29 @@ export default function Booking() {
       return;
     }
 
+    if (!formData.studentName.trim()) {
+      setError('Please enter your name');
+      return;
+    }
+
+    if (!formData.studentEmail.trim()) {
+      setError('Please enter your email');
+      return;
+    }
+
+    if (!formData.subject.trim()) {
+      setError('Please enter the subject');
+      return;
+    }
+
     try {
       setSubmitting(true);
       const booking = await createBooking(formData);
       setConfirmationData(booking);
       setCurrentStep('confirmation');
     } catch (err: any) {
+      console.error('Booking error:', err);
       setError(err.message || 'Failed to create booking. Please try again.');
-      console.error(err);
     } finally {
       setSubmitting(false);
     }
@@ -396,7 +411,7 @@ export default function Booking() {
                       value={formData.notes}
                       onChange={handleInputChange}
                       rows={4}
-                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
                       placeholder="Any specific topics you'd like to cover or questions you have..."
                     />
                   </div>
